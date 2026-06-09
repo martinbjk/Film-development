@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Film Assistant V2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a1a18;padding:1rem;max-width:600px;margin:auto}
+h1{font-size:20px;font-weight:500;margin-bottom:1rem;color:#1a1a18}
+.section{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.section-title{font-size:12px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.section-title i{font-size:16px}
+label{font-size:13px;color:#5f5e5a;display:block;margin-bottom:4px;margin-top:10px}
+label:first-of-type{margin-top:0}
+select,input[type=number]{width:100%;padding:8px 10px;border:1px solid #d3d1c7;border-radius:8px;font-size:14px;background:#f5f4f0;color:#1a1a18;outline:none;-webkit-appearance:none}
+select:focus,input:focus{box-shadow:0 0 0 2px #b5d4f4;border-color:#378add}
+button.primary{width:100%;padding:9px;margin-top:12px;border:1px solid #d3d1c7;border-radius:8px;background:#f5f4f0;color:#1a1a18;font-size:14px;cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
+button.primary:hover{background:#e8e7e2}
+button.primary:active{transform:scale(.98)}
+.result-box{margin-top:10px;background:#f5f4f0;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.7;color:#1a1a18}
+.result-box strong{font-weight:500}
+.timer-display{font-size:52px;font-weight:500;text-align:center;padding:12px 0;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:#1a1a18}
+.timer-done{color:#888780;font-size:24px}
+.hf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.hf-card{background:#f5f4f0;border-radius:8px;padding:10px 8px;text-align:center}
+.hf-f{font-size:13px;color:#5f5e5a;margin-bottom:2px}
+.hf-v{font-size:16px;font-weight:500}
+textarea{width:100%;padding:8px 10px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;background:#f5f4f0;color:#1a1a18;outline:none;resize:vertical;min-height:100px;font-family:monospace}
+textarea:focus{box-shadow:0 0 0 2px #b5d4f4;border-color:#378add}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;margin-top:6px;font-weight:500}
+.tag-push{background:#faeeda;color:#854f0b}
+.tag-pull{background:#e6f1fb;color:#185fa5}
+.tag-normal{background:#eaf3de;color:#3b6d11}
+@media(prefers-color-scheme:dark){
+  body{background:#1e1e1c;color:#f0efe8}
+  h1{color:#f0efe8}
+  .section{background:#2c2c2a;border-color:#444441}
+  select,input[type=number],textarea,button.primary{background:#1e1e1c;color:#f0efe8;border-color:#444441}
+  button.primary:hover{background:#2c2c2a}
+  .result-box,.hf-card{background:#1e1e1c;color:#f0efe8}
+  .section-title{color:#888780}
+  label{color:#b4b2a9}
+  .timer-done{color:#888780}
+  .hf-f{color:#888780}
+  .tag-push{background:#633806;color:#fac775}
+  .tag-pull{background:#0c447c;color:#b5d4f4}
+  .tag-normal{background:#27500a;color:#c0dd97}
+}
+</style>
+</head>
+<body>
+<h1><i class="ti ti-camera"></i> Film Assistant V2</h1>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-camera"></i> Film & Rodinal</div>
+  <label>Film</label>
+  <select id="film"></select>
+  <label>Spädning</label>
+  <select id="dilution">
+    <option value="25">Rodinal 1+25</option>
+    <option value="50" selected>Rodinal 1+50</option>
+    <option value="100">Rodinal 1+100</option>
+  </select>
+  <label>Exponerad som ISO</label>
+  <input id="iso" type="number">
+  <button class="primary" onclick="calc()"><i class="ti ti-calculator"></i> Beräkna tid</button>
+  <div id="result"></div>
+</div>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-droplet"></i> Rodinalblandning</div>
+  <label>Volym vätska (ml)</label>
+  <input id="vol" type="number" value="500">
+  <button class="primary" onclick="mix()"><i class="ti ti-math-function"></i> Beräkna blandning</button>
+  <div id="mixout"></div>
+</div>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-clock"></i> Framkallningstimer</div>
+  <label>Minuter</label>
+  <input id="mins" type="number" value="11">
+  <button class="primary" onclick="startTimer()"><i class="ti ti-player-play"></i> Starta timer</button>
+  <div id="timer" class="timer-display timer-done">Klar</div>
+</div>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-photo"></i> Negativanalys</div>
+  <label>Negativets karaktär</label>
+  <select onchange="analyse(this.value)">
+    <option>Normal</option>
+    <option>Tunt negativ</option>
+    <option>Tätt negativ</option>
+  </select>
+  <div id="analysis" class="result-box" style="margin-top:10px">Negativet ser normalt ut.</div>
+</div>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-ruler-measure"></i> Yashica Mat 80mm hyperfokal</div>
+  <div class="hf-grid">
+    <div class="hf-card"><div class="hf-f">f/8</div><div class="hf-v">≈ 13 m</div></div>
+    <div class="hf-card"><div class="hf-f">f/11</div><div class="hf-v">≈ 9 m</div></div>
+    <div class="hf-card"><div class="hf-f">f/16</div><div class="hf-v">≈ 6 m</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><i class="ti ti-notebook"></i> Loggbok</div>
+  <textarea id="log" placeholder="Datum, film, exponering, framkallning, noteringar…"></textarea>
+  <div class="btn-row">
+    <button class="primary" onclick="saveLog()"><i class="ti ti-device-floppy"></i> Spara</button>
+    <button class="primary" onclick="exportLog()"><i class="ti ti-download"></i> Exportera .txt</button>
+  </div>
+  <div id="log-status" style="font-size:12px;color:#888780;margin-top:6px;min-height:16px"></div>
+</div>
+
+<script>
+const films={"Kentmere 100":100,"Kentmere 400":400,"HP5+":400,"FP4+":125,"Delta 100":100,"Delta 400":400,"Pan F 50":50,"Fomapan 100":100,"Fomapan 200":200,"Fomapan 400":400,"Tri-X 400":400,"T-Max 100":100,"T-Max 400":400,"Rollei RPX 25":25,"Rollei RPX 100":100,"Rollei RPX 400":400,"Adox CHS 100 II":100,"Bergger Pancro 400":400};
+const filmSel=document.getElementById("film");
+for(const f in films){let o=document.createElement("option");o.text=f;filmSel.add(o);}
+filmSel.onchange=()=>{document.getElementById("iso").value=films[filmSel.value];};
+filmSel.selectedIndex=0;filmSel.onchange();
+
+function calc(){
+  const base=films[filmSel.value];
+  const iso=Number(document.getElementById("iso").value);
+  const dilution=document.getElementById("dilution").value;
+  let baseTime=dilution=="25"?7:dilution=="50"?11:18;
+  let stops=Math.log2(iso/base);
+  let time=baseTime*(1+stops*0.25);
+  let msg="Normal exponering.";
+  let tag='<span class="tag tag-normal">Normal</span>';
+  if(stops>0){msg="Push: ökar kontrast och korn.";tag='<span class="tag tag-push">Push +'+stops.toFixed(1)+'</span>';}
+  if(stops<0){msg="Pull: mer skuggdetalj, mjukare kontrast.";tag='<span class="tag tag-pull">Pull '+stops.toFixed(1)+'</span>';}
+  document.getElementById("result").innerHTML=`<div class="result-box"><strong>Filmens ISO:</strong> ${base}<br><strong>Framkallningstid:</strong> ${time.toFixed(1)} min<br>${msg} ${tag}</div>`;
+  document.getElementById("mins").value=time.toFixed(1);
+}
+function mix(){
+  let v=Number(document.getElementById("vol").value);
+  let r=Number(document.getElementById("dilution").value);
+  let rod=v/(r+1);
+  document.getElementById("mixout").innerHTML=`<div class="result-box"><strong>Rodinal:</strong> ${rod.toFixed(1)} ml<br><strong>Vatten:</strong> ${(v-rod).toFixed(1)} ml</div>`;
+}
+let timerInt;
+function startTimer(){
+  clearInterval(timerInt);
+  let sec=Math.round(Number(document.getElementById("mins").value)*60);
+  const el=document.getElementById("timer");
+  el.classList.remove("timer-done");
+  timerInt=setInterval(()=>{
+    if(sec<0){clearInterval(timerInt);el.textContent="Klar!";el.classList.add("timer-done");return;}
+    let m=Math.floor(sec/60),s=sec%60;
+    el.textContent=m+":"+String(s).padStart(2,"0");
+    sec--;
+  },1000);
+}
+function analyse(v){
+  let txt="Negativet ser normalt ut.";
+  if(v==="Tunt negativ")txt="Öka exponeringen ½–1 steg nästa gång.";
+  if(v==="Tätt negativ")txt="Minska framkallningstiden ca 10 %.";
+  document.getElementById("analysis").innerText=txt;
+}
+function saveLog(){
+  try{localStorage.setItem("film_log",document.getElementById("log").value);document.getElementById("log-status").textContent="✓ Sparad";}
+  catch(e){document.getElementById("log-status").textContent="Kunde inte spara";}
+}
+function exportLog(){
+  const text=document.getElementById("log").value;
+  if(!text.trim()){document.getElementById("log-status").textContent="Loggboken är tom";return;}
+  const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="FilmLog_"+new Date().toISOString().split("T")[0]+".txt";
+  link.click();
+}
+try{document.getElementById("log").value=localStorage.getItem("film_log")||"";}catch(e){}
+calc();mix();analyse("Normal");
+</script>
+</body>
+</html>
