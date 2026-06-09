@@ -8,7 +8,10 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a1a18;padding:1rem;max-width:600px;margin:auto}
-h1{font-size:20px;font-weight:500;margin-bottom:1rem;color:#1a1a18}
+h1{font-size:20px;font-weight:500;margin-bottom:1rem;color:#1a1a18;display:flex;align-items:center;gap:8px}
+.lang-bar{display:flex;gap:6px;margin-bottom:1rem}
+.lang-btn{padding:5px 14px;border:1px solid #d3d1c7;border-radius:20px;background:#fff;color:#5f5e5a;font-size:13px;cursor:pointer;font-weight:500;transition:all .15s}
+.lang-btn.active{background:#1a1a18;color:#f0efe8;border-color:#1a1a18}
 .section{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
 .section-title{font-size:12px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
 .section-title i{font-size:16px}
@@ -37,6 +40,8 @@ textarea:focus{box-shadow:0 0 0 2px #b5d4f4;border-color:#378add}
 @media(prefers-color-scheme:dark){
   body{background:#1e1e1c;color:#f0efe8}
   h1{color:#f0efe8}
+  .lang-btn{background:#2c2c2a;border-color:#444441;color:#b4b2a9}
+  .lang-btn.active{background:#f0efe8;color:#1a1a18;border-color:#f0efe8}
   .section{background:#2c2c2a;border-color:#444441}
   select,input[type=number],textarea,button.primary{background:#1e1e1c;color:#f0efe8;border-color:#444441}
   button.primary:hover{background:#2c2c2a}
@@ -52,53 +57,60 @@ textarea:focus{box-shadow:0 0 0 2px #b5d4f4;border-color:#378add}
 </style>
 </head>
 <body>
-<h1><i class="ti ti-camera"></i> Film Assistant V2</h1>
+
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('sv')">SV</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('de')">DE</button>
+</div>
+
+<h1><i class="ti ti-camera"></i> <span data-t="appTitle"></span></h1>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-camera"></i> Film & Rodinal</div>
-  <label>Film</label>
+  <div class="section-title"><i class="ti ti-camera"></i> <span data-t="sec1Title"></span></div>
+  <label data-t="labelFilm"></label>
   <select id="film"></select>
-  <label>Spädning</label>
+  <label data-t="labelDilution"></label>
   <select id="dilution">
     <option value="25">Rodinal 1+25</option>
     <option value="50" selected>Rodinal 1+50</option>
     <option value="100">Rodinal 1+100</option>
   </select>
-  <label>Exponerad som ISO</label>
+  <label data-t="labelIso"></label>
   <input id="iso" type="number">
-  <button class="primary" onclick="calc()"><i class="ti ti-calculator"></i> Beräkna tid</button>
+  <button class="primary" onclick="calc()"><i class="ti ti-calculator"></i> <span data-t="btnCalc"></span></button>
   <div id="result"></div>
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-droplet"></i> Rodinalblandning</div>
-  <label>Volym vätska (ml)</label>
+  <div class="section-title"><i class="ti ti-droplet"></i> <span data-t="sec2Title"></span></div>
+  <label data-t="labelVol"></label>
   <input id="vol" type="number" value="500">
-  <button class="primary" onclick="mix()"><i class="ti ti-math-function"></i> Beräkna blandning</button>
+  <button class="primary" onclick="mix()"><i class="ti ti-math-function"></i> <span data-t="btnMix"></span></button>
   <div id="mixout"></div>
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-clock"></i> Framkallningstimer</div>
-  <label>Minuter</label>
+  <div class="section-title"><i class="ti ti-clock"></i> <span data-t="sec3Title"></span></div>
+  <label data-t="labelMins"></label>
   <input id="mins" type="number" value="11">
-  <button class="primary" onclick="startTimer()"><i class="ti ti-player-play"></i> Starta timer</button>
-  <div id="timer" class="timer-display timer-done">Klar</div>
+  <button class="primary" onclick="startTimer()"><i class="ti ti-player-play"></i> <span data-t="btnTimer"></span></button>
+  <div id="timer" class="timer-display timer-done" data-t="timerReady"></div>
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-photo"></i> Negativanalys</div>
-  <label>Negativets karaktär</label>
-  <select onchange="analyse(this.value)">
-    <option>Normal</option>
-    <option>Tunt negativ</option>
-    <option>Tätt negativ</option>
+  <div class="section-title"><i class="ti ti-photo"></i> <span data-t="sec4Title"></span></div>
+  <label data-t="labelNeg"></label>
+  <select id="negSel" onchange="analyse(this.value)">
+    <option data-t="negNormal"></option>
+    <option data-t="negThin"></option>
+    <option data-t="negDense"></option>
   </select>
-  <div id="analysis" class="result-box" style="margin-top:10px">Negativet ser normalt ut.</div>
+  <div id="analysis" class="result-box" style="margin-top:10px"></div>
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-ruler-measure"></i> Yashica Mat 80mm hyperfokal</div>
+  <div class="section-title"><i class="ti ti-ruler-measure"></i> <span data-t="sec5Title"></span></div>
   <div class="hf-grid">
     <div class="hf-card"><div class="hf-f">f/8</div><div class="hf-v">≈ 13 m</div></div>
     <div class="hf-card"><div class="hf-f">f/11</div><div class="hf-v">≈ 9 m</div></div>
@@ -107,16 +119,109 @@ textarea:focus{box-shadow:0 0 0 2px #b5d4f4;border-color:#378add}
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="ti ti-notebook"></i> Loggbok</div>
-  <textarea id="log" placeholder="Datum, film, exponering, framkallning, noteringar…"></textarea>
+  <div class="section-title"><i class="ti ti-notebook"></i> <span data-t="sec6Title"></span></div>
+  <textarea id="log" data-t-placeholder="logPlaceholder"></textarea>
   <div class="btn-row">
-    <button class="primary" onclick="saveLog()"><i class="ti ti-device-floppy"></i> Spara</button>
-    <button class="primary" onclick="exportLog()"><i class="ti ti-download"></i> Exportera .txt</button>
+    <button class="primary" onclick="saveLog()"><i class="ti ti-device-floppy"></i> <span data-t="btnSave"></span></button>
+    <button class="primary" onclick="exportLog()"><i class="ti ti-download"></i> <span data-t="btnExport"></span></button>
   </div>
   <div id="log-status" style="font-size:12px;color:#888780;margin-top:6px;min-height:16px"></div>
 </div>
 
 <script>
+const i18n={
+  sv:{
+    appTitle:"Film Assistant V2",
+    sec1Title:"Film & Rodinal",sec2Title:"Rodinalblandning",sec3Title:"Framkallningstimer",
+    sec4Title:"Negativanalys",sec5Title:"Yashica Mat 80mm hyperfokal",sec6Title:"Loggbok",
+    labelFilm:"Film",labelDilution:"Spädning",labelIso:"Exponerad som ISO",
+    labelVol:"Volym vätska (ml)",labelMins:"Minuter",labelNeg:"Negativets karaktär",
+    btnCalc:"Beräkna tid",btnMix:"Beräkna blandning",btnTimer:"Starta timer",
+    btnSave:"Spara",btnExport:"Exportera .txt",
+    timerReady:"Klar",timerDone:"Klar!",
+    negNormal:"Normal",negThin:"Tunt negativ",negDense:"Tätt negativ",
+    filmISO:"Filmens ISO",devTime:"Framkallningstid",min:"min",
+    rodinal:"Rodinal",water:"Vatten",
+    msgNormal:"Normal exponering.",msgPush:"Push: ökar kontrast och korn.",msgPull:"Pull: mer skuggdetalj, mjukare kontrast.",
+    tagNormal:"Normal",tagPush:"Push",tagPull:"Pull",
+    analysisNormal:"Negativet ser normalt ut.",
+    analysisThin:"Öka exponeringen ½–1 steg nästa gång.",
+    analysisDense:"Minska framkallningstiden ca 10 %.",
+    logPlaceholder:"Datum, film, exponering, framkallning, noteringar…",
+    saved:"✓ Sparad",empty:"Loggboken är tom",saveErr:"Kunde inte spara"
+  },
+  en:{
+    appTitle:"Film Assistant V2",
+    sec1Title:"Film & Rodinal",sec2Title:"Rodinal Mix",sec3Title:"Development Timer",
+    sec4Title:"Negative Analysis",sec5Title:"Yashica Mat 80mm Hyperfocal",sec6Title:"Logbook",
+    labelFilm:"Film",labelDilution:"Dilution",labelIso:"Exposed at ISO",
+    labelVol:"Total volume (ml)",labelMins:"Minutes",labelNeg:"Negative character",
+    btnCalc:"Calculate time",btnMix:"Calculate mix",btnTimer:"Start timer",
+    btnSave:"Save",btnExport:"Export .txt",
+    timerReady:"Ready",timerDone:"Done!",
+    negNormal:"Normal",negThin:"Thin negative",negDense:"Dense negative",
+    filmISO:"Film ISO",devTime:"Development time",min:"min",
+    rodinal:"Rodinal",water:"Water",
+    msgNormal:"Normal exposure.",msgPush:"Push: increases contrast and grain.",msgPull:"Pull: more shadow detail, softer contrast.",
+    tagNormal:"Normal",tagPush:"Push",tagPull:"Pull",
+    analysisNormal:"The negative looks normal.",
+    analysisThin:"Increase exposure by ½–1 stop next time.",
+    analysisDense:"Reduce development time by approx. 10%.",
+    logPlaceholder:"Date, film, exposure, development, notes…",
+    saved:"✓ Saved",empty:"Logbook is empty",saveErr:"Could not save"
+  },
+  de:{
+    appTitle:"Film Assistent V2",
+    sec1Title:"Film & Rodinal",sec2Title:"Rodinalmischung",sec3Title:"Entwicklungs-Timer",
+    sec4Title:"Negativanalyse",sec5Title:"Yashica Mat 80mm Hyperfokus",sec6Title:"Logbuch",
+    labelFilm:"Film",labelDilution:"Verdünnung",labelIso:"Belichtet als ISO",
+    labelVol:"Gesamtvolumen (ml)",labelMins:"Minuten",labelNeg:"Negativeigenschaft",
+    btnCalc:"Zeit berechnen",btnMix:"Mischung berechnen",btnTimer:"Timer starten",
+    btnSave:"Speichern",btnExport:"Exportieren .txt",
+    timerReady:"Bereit",timerDone:"Fertig!",
+    negNormal:"Normal",negThin:"Dünnes Negativ",negDense:"Dichtes Negativ",
+    filmISO:"Film-ISO",devTime:"Entwicklungszeit",min:"Min",
+    rodinal:"Rodinal",water:"Wasser",
+    msgNormal:"Normale Belichtung.",msgPush:"Push: erhöht Kontrast und Korn.",msgPull:"Pull: mehr Schattendetail, weicherer Kontrast.",
+    tagNormal:"Normal",tagPush:"Push",tagPull:"Pull",
+    analysisNormal:"Das Negativ sieht normal aus.",
+    analysisThin:"Belichtung beim nächsten Mal um ½–1 Blende erhöhen.",
+    analysisDense:"Entwicklungszeit um ca. 10 % reduzieren.",
+    logPlaceholder:"Datum, Film, Belichtung, Entwicklung, Notizen…",
+    saved:"✓ Gespeichert",empty:"Logbuch ist leer",saveErr:"Konnte nicht gespeichert werden"
+  }
+};
+
+let lang="sv";
+function t(key){return i18n[lang][key]||key;}
+
+function setLang(l){
+  lang=l;
+  document.querySelectorAll(".lang-btn").forEach(b=>b.classList.toggle("active",b.textContent===l.toUpperCase()));
+  document.documentElement.lang=l;
+  document.querySelectorAll("[data-t]").forEach(el=>{
+    const key=el.getAttribute("data-t");
+    const val=t(key);
+    if(val) el.textContent=val;
+  });
+  document.querySelectorAll("[data-t-placeholder]").forEach(el=>{
+    el.placeholder=t(el.getAttribute("data-t-placeholder"));
+  });
+  // update select options for negative analysis
+  const negSel=document.getElementById("negSel");
+  negSel.options[0].text=t("negNormal");
+  negSel.options[1].text=t("negThin");
+  negSel.options[2].text=t("negDense");
+  // re-render outputs
+  calc();mix();analyse(negSel.value);
+  // timer ready label if not running
+  const timerEl=document.getElementById("timer");
+  if(timerEl.classList.contains("timer-done") && !timerRunning){
+    timerEl.textContent=t("timerReady");
+  }
+  document.title=t("appTitle");
+}
+
 const films={"Kentmere 100":100,"Kentmere 400":400,"HP5+":400,"FP4+":125,"Delta 100":100,"Delta 400":400,"Pan F 50":50,"Fomapan 100":100,"Fomapan 200":200,"Fomapan 400":400,"Tri-X 400":400,"T-Max 100":100,"T-Max 400":400,"Rollei RPX 25":25,"Rollei RPX 100":100,"Rollei RPX 400":400,"Adox CHS 100 II":100,"Bergger Pancro 400":400};
 const filmSel=document.getElementById("film");
 for(const f in films){let o=document.createElement("option");o.text=f;filmSel.add(o);}
@@ -130,45 +235,50 @@ function calc(){
   let baseTime=dilution=="25"?7:dilution=="50"?11:18;
   let stops=Math.log2(iso/base);
   let time=baseTime*(1+stops*0.25);
-  let msg="Normal exponering.";
-  let tag='<span class="tag tag-normal">Normal</span>';
-  if(stops>0){msg="Push: ökar kontrast och korn.";tag='<span class="tag tag-push">Push +'+stops.toFixed(1)+'</span>';}
-  if(stops<0){msg="Pull: mer skuggdetalj, mjukare kontrast.";tag='<span class="tag tag-pull">Pull '+stops.toFixed(1)+'</span>';}
-  document.getElementById("result").innerHTML=`<div class="result-box"><strong>Filmens ISO:</strong> ${base}<br><strong>Framkallningstid:</strong> ${time.toFixed(1)} min<br>${msg} ${tag}</div>`;
+  let msg=t("msgNormal");
+  let tag=`<span class="tag tag-normal">${t("tagNormal")}</span>`;
+  if(stops>0){msg=t("msgPush");tag=`<span class="tag tag-push">${t("tagPush")} +${stops.toFixed(1)}</span>`;}
+  if(stops<0){msg=t("msgPull");tag=`<span class="tag tag-pull">${t("tagPull")} ${stops.toFixed(1)}</span>`;}
+  document.getElementById("result").innerHTML=`<div class="result-box"><strong>${t("filmISO")}:</strong> ${base}<br><strong>${t("devTime")}:</strong> ${time.toFixed(1)} ${t("min")}<br>${msg} ${tag}</div>`;
   document.getElementById("mins").value=time.toFixed(1);
 }
+
 function mix(){
   let v=Number(document.getElementById("vol").value);
   let r=Number(document.getElementById("dilution").value);
   let rod=v/(r+1);
-  document.getElementById("mixout").innerHTML=`<div class="result-box"><strong>Rodinal:</strong> ${rod.toFixed(1)} ml<br><strong>Vatten:</strong> ${(v-rod).toFixed(1)} ml</div>`;
+  document.getElementById("mixout").innerHTML=`<div class="result-box"><strong>${t("rodinal")}:</strong> ${rod.toFixed(1)} ml<br><strong>${t("water")}:</strong> ${(v-rod).toFixed(1)} ml</div>`;
 }
-let timerInt;
+
+let timerInt, timerRunning=false;
 function startTimer(){
   clearInterval(timerInt);
   let sec=Math.round(Number(document.getElementById("mins").value)*60);
   const el=document.getElementById("timer");
   el.classList.remove("timer-done");
+  timerRunning=true;
   timerInt=setInterval(()=>{
-    if(sec<0){clearInterval(timerInt);el.textContent="Klar!";el.classList.add("timer-done");return;}
+    if(sec<0){clearInterval(timerInt);el.textContent=t("timerDone");el.classList.add("timer-done");timerRunning=false;return;}
     let m=Math.floor(sec/60),s=sec%60;
     el.textContent=m+":"+String(s).padStart(2,"0");
     sec--;
   },1000);
 }
+
 function analyse(v){
-  let txt="Negativet ser normalt ut.";
-  if(v==="Tunt negativ")txt="Öka exponeringen ½–1 steg nästa gång.";
-  if(v==="Tätt negativ")txt="Minska framkallningstiden ca 10 %.";
-  document.getElementById("analysis").innerText=txt;
+  const negSel=document.getElementById("negSel");
+  const idx=negSel.selectedIndex;
+  const msgs=[t("analysisNormal"),t("analysisThin"),t("analysisDense")];
+  document.getElementById("analysis").innerText=msgs[idx]||msgs[0];
 }
+
 function saveLog(){
-  try{localStorage.setItem("film_log",document.getElementById("log").value);document.getElementById("log-status").textContent="✓ Sparad";}
-  catch(e){document.getElementById("log-status").textContent="Kunde inte spara";}
+  try{localStorage.setItem("film_log",document.getElementById("log").value);document.getElementById("log-status").textContent=t("saved");}
+  catch(e){document.getElementById("log-status").textContent=t("saveErr");}
 }
 function exportLog(){
   const text=document.getElementById("log").value;
-  if(!text.trim()){document.getElementById("log-status").textContent="Loggboken är tom";return;}
+  if(!text.trim()){document.getElementById("log-status").textContent=t("empty");return;}
   const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
   const link=document.createElement("a");
   link.href=URL.createObjectURL(blob);
@@ -176,7 +286,8 @@ function exportLog(){
   link.click();
 }
 try{document.getElementById("log").value=localStorage.getItem("film_log")||"";}catch(e){}
-calc();mix();analyse("Normal");
+
+setLang("sv");
 </script>
 </body>
 </html>
